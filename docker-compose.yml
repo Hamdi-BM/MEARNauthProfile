@@ -1,0 +1,15 @@
+version: '3'
+services:
+  # Node.js app service
+  app:
+    build: .
+    container_name: node-app
+    ports:
+      - "80:3600"  # Exposing Node.js app port
+    volumes:
+      - .:/app  # Sync project files with container
+    depends_on:
+      - mongo  # Ensure MongoDB starts before Node.js app
+    environment:
+      MONGO_URI: ${MONGO_URI}
+    command: npm run server  # Command to run the Node.js app
