@@ -5,11 +5,11 @@ services:
     build: .
     container_name: node-app
     ports:
-      - "80:3600"  # Exposing Node.js app port
+      - "${PORT:-3000}:3600"  # Map host port to container port
     volumes:
       - .:/app  # Sync project files with container
-    depends_on:
-      - mongo  # Ensure MongoDB starts before Node.js app
+      - /app/node_modules  # Prevent overriding node_modules
     environment:
-      MONGO_URI: ${MONGO_URI}
+      - MONGO_URI=${MONGO_URI}  # Fetch MongoDB URI from environment
+      - PORT=${PORT}            # Pass the port variable to the app
     command: npm run server  # Command to run the Node.js app
