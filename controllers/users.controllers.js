@@ -1,7 +1,7 @@
 const User = require("../models/user");
-const validateregister = require("../validation/register");
+const validateregister = require("../Validation/register");
 var bcrypt = require('bcryptjs');
-const validateLogin=require('../validation/login');
+const validateLogin=require('../Validation/login');
 var jwt = require('jsonwebtoken');
 exports.Register = async (req, res) => {
     req.body.role = "USER";
@@ -37,7 +37,6 @@ exports.Login = async (req, res) => {
         if (!user) return res.status(404).json({ message: 'User not found.' });
         const isMatch = bcrypt.compareSync(req.body.password, user.password) && req.body.username === user.username; 
         if (!isMatch) return res.status(400).json({ message: 'Invalid credentials.' });
-
         return res.status(200).json({message : 'connected'})
     }  catch (err) {
         console.log(err);

@@ -9,7 +9,7 @@ COPY package*.json ./
 
 # Install Node.js dependencies
 RUN npm install
-
+RUN npm install express
 # Copy the rest of the project files into the container
 COPY . .
 
