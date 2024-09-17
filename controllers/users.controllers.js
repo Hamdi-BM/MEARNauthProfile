@@ -37,7 +37,18 @@ exports.Login = async (req, res) => {
         if (!user) return res.status(404).json({ message: 'User not found.' });
         const isMatch = bcrypt.compareSync(req.body.password, user.password) && req.body.username === user.username; 
         if (!isMatch) return res.status(400).json({ message: 'Invalid credentials.' });
-        return res.status(200).json({message : 'connected'})
+        // Generate and send JWT token
+        const accessToken = jwt.sign({ id: user.id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '2h' });
+        const refreshToken=jwt.sign({ id: user.id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '5d' });
+        try {
+            await User.updateOne({ _id: user._id }, { $set: { refreshToken } }, { strict: false });
+            console.log('User saved successfully');  // Confirmation
+          } catch (err) {
+            console.error('Error saving user:', err);
+          }
+          
+        res.cookie('refreshToken', refreshToken, { expires: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), httpOnly: true });
+        return res.status(200).json({accessToken});
     }  catch (err) {
         console.log(err);
         return res.status(500).json({ message: 'Internal server error.' });
