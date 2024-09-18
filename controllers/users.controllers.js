@@ -4,7 +4,10 @@ var bcrypt = require('bcryptjs');
 const validateLogin=require('../Validation/login');
 var jwt = require('jsonwebtoken');
 exports.Register = async (req, res) => {
-    req.body.role = "USER";
+    if(!req.body.role){
+        req.body.role = "USER";
+    }
+    
     // Validate the registration data
     const errors = validateregister(req.body);
     if (errors.length > 0) {
@@ -38,10 +41,10 @@ exports.Login = async (req, res) => {
         const isMatch = bcrypt.compareSync(req.body.password, user.password) && req.body.username === user.username; 
         if (!isMatch) return res.status(400).json({ message: 'Invalid credentials.' });
         // Generate and send JWT token
-        const accessToken = jwt.sign({ id: user.id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '2h' });
-        const refreshToken=jwt.sign({ id: user.id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '5d' });
+        var accessToken = jwt.sign({ id: user._id ,role: user.role}, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '2h' });
+        var refreshToken=jwt.sign({ id: user._id ,role: user.role}, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '5d' });
         try {
-            await User.updateOne({ _id: user._id }, { $set: { refreshToken } }, { strict: false });
+            await User.updateOne({ _id: user._id ,role: user.role}, { $set: { refreshToken } }, { strict: false });
             console.log('User saved successfully');  // Confirmation
           } catch (err) {
             console.error('Error saving user:', err);
@@ -52,5 +55,16 @@ exports.Login = async (req, res) => {
     }  catch (err) {
         console.log(err);
         return res.status(500).json({ message: 'Internal server error.' });
+    }
+};
+
+exports.Test =  (req, res) => { res.send("you are authorized to access this page")};
+
+exports.Admin = (req, res) => {
+    console.log(req.user);
+    if (req.user.role === 'ADMIN') {
+        res.send("you are authorized to access this page")
+    } else {
+        res.status(403).send("Access denied. You are not an admin.")
     }
 };
