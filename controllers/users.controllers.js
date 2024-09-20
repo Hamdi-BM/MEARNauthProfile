@@ -4,9 +4,9 @@ var bcrypt = require('bcryptjs');
 const validateLogin=require('../Validation/login');
 var jwt = require('jsonwebtoken');
 exports.Register = async (req, res) => {
-    if(!req.body.role){
+    // Set default role to USER
         req.body.role = "USER";
-    }
+    
     
     // Validate the registration data
     const errors = validateregister(req.body);
@@ -58,13 +58,5 @@ exports.Login = async (req, res) => {
     }
 };
 
-exports.Test =  (req, res) => { res.send("you are authorized to access this page")};
 
-exports.Admin = (req, res) => {
-    console.log(req.user);
-    if (req.user.role === 'ADMIN') {
-        res.send("you are authorized to access this page")
-    } else {
-        res.status(403).send("Access denied. You are not an admin.")
-    }
-};
+
